@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ဓမ္မဉာဏ်ပွား | Dhamma Insights</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Prevent scrolling */
+        }
+        /* Video Background Styling */
+        #background-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Cover the entire screen */
+            z-index: -2; /* Place behind all other content */
+        }
+        /* Ripple Canvas Styling */
+        #ripple-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Above video, below text */
+        }
+        #app-container {
+            position: relative;
+            z-index: 10; /* Ensure text is above ripples and video */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Full viewport height */
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer; /* Indicate clickable area */
+        }
+        #dhamma-text {
+            color: #E0E7FF; /* Light blue-gray for text */
+            font-size: 1.75rem; /* Base font size */
+            font-weight: 600;
+            line-height: 1.5;
+            max-width: 90%; /* Max width for readability */
+            padding: 1rem;
+            border-radius: 0.75rem; /* Rounded corners */
+            background-color: rgba(30, 41, 59, 0.7); /* Semi-transparent dark background */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+            transition: opacity 0.5s ease-in-out; /* Smooth fade effect */
+        }
+        #music-control-button {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            background-color: rgba(30, 41, 59, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            z-index: 20; /* Ensure button is on top of everything */
+        }
+        #music-control-button:hover {
+            background-color: rgba(45, 60, 80, 0.9);
+            transform: scale(1.05);
+        }
+        #music-control-button img { /* Changed from svg to img */
+            filter: brightness(0) invert(1); /* Makes the image white if it's black */
+            width: 30px;
+            height: 30px;
+        }
+
+        /* Responsive font sizes */
+        @media (min-width: 640px) { /* sm breakpoint */
+            #dhamma-text {
+                font-size: 2.25rem;
+            }
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            #dhamma-text {
+                font-size: 2.75rem;
+            }
+        }
+        @media (min-width: 1024px) { /* lg breakpoint */
+            #dhamma-text {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <!-- Video Background -->
+    <video id="background-video" autoplay loop muted playsinline>
+        <source src="buddha-background.mp4" type="video/mp4">
+        သင့်ဘရောက်ဆာက ဗီဒီယိုကို မပံ့ပိုးပါ။
+    </video>
+
+    <!-- Ripple Canvas -->
+    <canvas id="ripple-canvas"></canvas>
+
+    <!-- Main App Container -->
+    <div id="app-container" class="flex flex-col items-center justify-center min-h-screen w-full">
+        <p id="dhamma-text" class="rounded-xl shadow-lg p-6 sm:p-8 md:p-10 lg:p-12 text-center transition-opacity duration-500 opacity-0">
+            <!-- Dhamma text will be inserted here by JavaScript -->
+        </p>
+    </div>
+
+    <!-- Background Music -->
+    <audio id="background-music" loop preload="auto" autoplay>
+        <!-- Replace with your actual relaxing audio URL -->
+        <source src="buddha.mp3" type="audio/mpeg">
+        သင့်ဘရောက်ဆာက အသံဖိုင်ကို မပံ့ပိုးပါ။
+    </audio>
+
+    <!-- Music Control Button -->
+    <button id="music-control-button" aria-label="Play/Pause Music">
+        <img src="lotus.svg" alt="Music Control" id="music-icon" class="w-10 h-10">
+    </button>
+
+    <script>
+        // Dhamma Reflection Phrases
+        const dhammaPhrases = [
+            "ရုပ် နဲ့ နာမ် မတူဘူး",
+            "ငါအစွဲကိုဖြုတ်",
+            "နာတာ၊ ကြိုက်တာ 'ငါ' မဟုတ်ဘူး",
+            "နာကျင်မှုကို သတိနဲ့ ကြည့်",
+            "ရုပ်ကြောင့် နာမ်က ဖြစ်လာရတယ်",
+            "ရုပ်ဖောက်ပြန်လို့ နာမ်ဝေဒနာ ဖြစ်ပေါ်လာတယ်",
+            "ရုပ်တရားကလဲ သူ့ အလုပ်သူလုပ်တယ်",
+            "နာမ်ကသူ့အလုပ်သူလုပ်နေတယ်",
+            "ငါအစွဲပြုတ်ရင် နာမ်တရားကို မတွယ်တာတော့ဘူး",
+            "ငါအစွဲပြုတ်ရင် ကိလေသာ မဖြစ်တော့ဘူး",
+            "ငါအစွဲပြုတ်ရင် ပူပန်မှု ကင်းမယ်",
+            "နာကျင်မှုဆိုတာဟာ ဖြစ်ပျက်နေတဲ့ ရုပ်နာမ်ဖြစ်စဉ်သက်သက်သာဖြစ်ပြီး၊ 'ငါ' နာကျင်တာ မဟုတ်ဘူး",
+            "အရာအားလုံး အနိစ္စ (မမြဲ) ပဲ",
+            "နာမ်တရား ဖြစ်ပြီး ခဏချင်း ပျက်စီးတယ်",
+            "နာကျင်မှုဝေဒနာ ဖြစ်ပြီး ပျက်စီးတယ်",
+            "ဒုက္ခဆိုတာလဲ ဖြစ်ပြီးပျက်မှာပဲ",
+            "ခန္ဓာကိုယ်၊ မျက်စိ၊ နား၊ အာရုံများ ရုပ်တရားပဲ",
+            "ဝေဒနာ နာမ်တရား",
+            "မှတ်သားမှု နာမ်တရား",
+            "စေတသိက် နာမ်တရား",
+            "သိစိတ် (ဝိညာဉ်) နာမ်တရား",
+            "ငါ၊ သူ၊ လူ၊ သတ္တဝါ ပညတ်သာ",
+            "အမှန်တရား ပရမတ်သာ",
+            "ဖြစ်ပျက်ကို ရှုမှတ်",
+            "သတိနဲ့ အသိ",
+            "အနိစ္စ၊ ဒုက္ခ၊ အနတ္တ မြင်အောင်ရှု",
+            "ကိလေသာ တွေ ပယ်",
+            "ဒေါသဆိုတာ နာမ်တရားပဲ",
+            "ဒေါသ ဖြစ်ပြီး ပျက်စီးမှာပဲ",
+            "ဒေါသကို သတိနဲ့ သိပါ",
+            "အာရုံကြောင့် ဒေါသနာမ်တရား ပေါ်လာရတာ",
+            "ဖြစ်ပြီးပျက်မယ့် ဒေါသနာမ် တရား လိုက်မခံစားနဲ့",
+            "မေတ္တာ မေတ္တာ",
+            "အေးချမ်းကြပါစေ"
+        ];
+
+        const dhammaTextElement = document.getElementById('dhamma-text');
+        const appContainer = document.getElementById('app-container');
+        const backgroundMusic = document.getElementById('background-music');
+        const musicControlButton = document.getElementById('music-control-button');
+        const musicIcon = document.getElementById('music-icon');
+        const backgroundVideo = document.getElementById('background-video');
+
+        let shuffledPhrases = [];
+        let currentShuffledIndex = 0;
+        let isMusicPlaying = false;
+        let phraseInterval; // Interval ID for automatic phrase change
+
+        // Fisher-Yates shuffle algorithm
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        // Function to get the next phrase in the shuffled sequence
+        function getNextPhrase() {
+            if (currentShuffledIndex >= shuffledPhrases.length) {
+                // All phrases displayed, reshuffle
+                shuffledPhrases = shuffleArray([...dhammaPhrases]); // Create a shallow copy to shuffle
+                currentShuffledIndex = 0;
+            }
+            return shuffledPhrases[currentShuffledIndex++];
+        }
+
+        // Function to display phrase with fade effect
+        function displayPhrase() {
+            dhammaTextElement.style.opacity = 0; // Fade out
+            setTimeout(() => {
+                dhammaTextElement.textContent = getNextPhrase();
+                dhammaTextElement.style.opacity = 1; // Fade in
+            }, 500); // Wait for fade out to complete
+        }
+
+        // Ripple Canvas Setup
+        const rippleCanvas = document.getElementById('ripple-canvas');
+        const rippleCtx = rippleCanvas.getContext('2d');
+        let ripples = [];
+
+        function resizeRippleCanvas() {
+            rippleCanvas.width = window.innerWidth;
+            rippleCanvas.height = window.innerHeight;
+        }
+
+        class Ripple {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = 0;
+                this.alpha = 1;
+                this.speed = 2; // Ripple expansion speed
+                this.maxRadius = Math.max(rippleCanvas.width, rippleCanvas.height) * 0.3; // Max size of ripple
+            }
+
+            update() {
+                this.radius += this.speed;
+                this.alpha -= 0.008; // Fade out speed
+            }
+
+            draw() {
+                rippleCtx.save();
+                rippleCtx.beginPath();
+                rippleCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                rippleCtx.strokeStyle = `rgba(255, 255, 255, ${this.alpha})`; // White ripple
+                rippleCtx.lineWidth = 2;
+                rippleCtx.stroke();
+                rippleCtx.restore();
+            }
+        }
+
+        function animateRipples() {
+            rippleCtx.clearRect(0, 0, rippleCanvas.width, rippleCanvas.height);
+            for (let i = ripples.length - 1; i >= 0; i--) {
+                const ripple = ripples[i];
+                ripple.update();
+                ripple.draw();
+                if (ripple.alpha <= 0 || ripple.radius > ripple.maxRadius) {
+                    ripples.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(animateRipples);
+        }
+
+        // Event listener for screen tap/click
+        appContainer.addEventListener('click', (event) => {
+            displayPhrase();
+            // Create ripple effect
+            ripples.push(new Ripple(event.clientX, event.clientY));
+
+            // Start music on first interaction (if not already playing)
+            // This block is now redundant if autoplay works, but kept for robustness against browser policies.
+            if (!isMusicPlaying) {
+                backgroundMusic.volume = 0.1; // Set low volume
+                backgroundMusic.play().then(() => {
+                    isMusicPlaying = true;
+                }).catch(error => {
+                    console.error("Audio playback failed:", error);
+                    // Inform user if audio fails (e.g., browser autoplay policy)
+                });
+            }
+            // Reset the automatic phrase change timer on user click
+            clearInterval(phraseInterval);
+            phraseInterval = setInterval(displayPhrase, 20000); // Restart the interval
+        });
+
+        // Music control button functionality
+        musicControlButton.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent click from triggering appContainer click
+            if (backgroundMusic.paused) {
+                backgroundMusic.play();
+                isMusicPlaying = true;
+                musicIcon.src = 'lotus.svg';
+                // Since using <img>, we don't change innerHTML.
+                // If you had separate play/pause images, you'd change musicIcon.src here.
+            } else {
+                backgroundMusic.pause();
+                isMusicPlaying = false;
+                musicIcon.src = 'play.svg'; // Reset to lotus icon when paused
+                // If you had separate play/pause images, you'd change musicIcon.src here.
+            }
+        });
+
+
+        // Initial setup on load
+        document.addEventListener('DOMContentLoaded', () => {
+            shuffledPhrases = shuffleArray([...dhammaPhrases]); // Initial shuffle
+            displayPhrase(); // Display first phrase
+            resizeRippleCanvas(); // Set initial size for ripple canvas
+            animateRipples(); // Start ripple animation
+
+            // Start automatic phrase change
+            phraseInterval = setInterval(displayPhrase, 20000); // Change phrase every 20 seconds
+            
+            // Attempt to play music automatically on load
+            // This is the primary autoplay trigger for the music.
+            backgroundMusic.volume = 0.1;
+            backgroundMusic.play().then(() => {
+                isMusicPlaying = true;
+            }).catch(error => {
+                console.error("Autoplay failed:", error);
+                // If autoplay fails, it means the browser blocked it.
+                // The user will need to interact with the screen/button to start music.
+            });
+        });
+
+        // Resize listeners
+        window.addEventListener('resize', resizeRippleCanvas);
+    </script>
+</body>
+</html>
