@@ -8,6 +8,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- PWA: Web App Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <!-- PWA: Apple Specific Meta Tags for iOS Home Screen -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="ဓမ္မဉာဏ်ပွား">
+    <link rel="apple-touch-icon" href="icon-512x512.png"> <!-- For iOS Home Screen Icon -->
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -59,7 +68,8 @@
         #music-control-button {
             position: absolute;
             bottom: 2rem;
-            left: 50%;
+            left: 2rem; /* Changed from 50% to 2rem */
+            /* transform: translateX(-50%); -- Removed this line */
             background-color: rgba(30, 41, 59, 0.8);
             border: none;
             border-radius: 50%;
@@ -105,7 +115,7 @@
 
     <!-- Video Background -->
     <video id="background-video" autoplay loop muted playsinline>
-        <source src="buddha-background.mp4" type="video/mp4">
+        <source src="buddha-bg.mp4" type="video/mp4">
         သင့်ဘရောက်ဆာက ဗီဒီယိုကို မပံ့ပိုးပါ။
     </video>
 
@@ -136,7 +146,7 @@
         const dhammaPhrases = [
             "ရုပ် နဲ့ နာမ် မတူဘူး",
             "ငါအစွဲကိုဖြုတ်",
-            "နာတာ၊ ကြိုက်တာ 'ငါ' မဟုတ်ဘူး",
+            "နာကျင်နေတာ 'ငါ'မဟုတ်ဘူး မခံစားနဲ့",
             "နာကျင်မှုကို သတိနဲ့ ကြည့်",
             "ရုပ်ကြောင့် နာမ်က ဖြစ်လာရတယ်",
             "ရုပ်ဖောက်ပြန်လို့ နာမ်ဝေဒနာ ဖြစ်ပေါ်လာတယ်",
@@ -145,29 +155,34 @@
             "ငါအစွဲပြုတ်ရင် နာမ်တရားကို မတွယ်တာတော့ဘူး",
             "ငါအစွဲပြုတ်ရင် ကိလေသာ မဖြစ်တော့ဘူး",
             "ငါအစွဲပြုတ်ရင် ပူပန်မှု ကင်းမယ်",
-            "နာကျင်မှုဆိုတာဟာ ဖြစ်ပျက်နေတဲ့ ရုပ်နာမ်ဖြစ်စဉ်သက်သက်သာဖြစ်ပြီး၊ 'ငါ' နာကျင်တာ မဟုတ်ဘူး",
+            "နာကျင်မှုဆိုတာဟာ ဖြစ်ပျက်နေတဲ့ ရုပ်နာမ်ဖြစ်စဉ်သပ်သပ်သာ",
             "အရာအားလုံး အနိစ္စ (မမြဲ) ပဲ",
-            "နာမ်တရား ဖြစ်ပြီး ခဏချင်း ပျက်စီးတယ်",
-            "နာကျင်မှုဝေဒနာ ဖြစ်ပြီး ပျက်စီးတယ်",
+            "နာမ်တရား ဖြစ်ပြီး ခဏ ပျက်စီးတာပဲ",
+            "နာကျင်မှုဝေဒနာ ဆိုတာ ဖြစ်ပြီး ပျက်စီးမှာပဲ",
+            "ပျော်ရွှင်မှုဆိုတာလဲ ဖြစ်ပြီး ပျက်မှာပဲ",
             "ဒုက္ခဆိုတာလဲ ဖြစ်ပြီးပျက်မှာပဲ",
             "ခန္ဓာကိုယ်၊ မျက်စိ၊ နား၊ အာရုံများ ရုပ်တရားပဲ",
-            "ဝေဒနာ နာမ်တရား",
-            "မှတ်သားမှု နာမ်တရား",
-            "စေတသိက် နာမ်တရား",
-            "သိစိတ် (ဝိညာဉ်) နာမ်တရား",
-            "ငါ၊ သူ၊ လူ၊ သတ္တဝါ ပညတ်သာ",
+            "ဝေဒနာဆိုတာ နာမ်တရား",
+            "မှတ်သားမှုဆိုတာ နာမ်တရား",
+            "စေတသိက်ကလဲ နာမ်တရား",
+            "သိစိတ်(ဝိညာဉ်)ဆိုတာ နာမ်တရား",
+            "ငါ၊ သူ၊ လူ၊ သတ္တဝါ ပညတ်တရား",
             "အမှန်တရား ပရမတ်သာ",
             "ဖြစ်ပျက်ကို ရှုမှတ်",
             "သတိနဲ့ အသိ",
             "အနိစ္စ၊ ဒုက္ခ၊ အနတ္တ မြင်အောင်ရှု",
-            "ကိလေသာ တွေ ပယ်",
+            "ကိလေသာကို ပယ်ပါ",
             "ဒေါသဆိုတာ နာမ်တရားပဲ",
             "ဒေါသ ဖြစ်ပြီး ပျက်စီးမှာပဲ",
             "ဒေါသကို သတိနဲ့ သိပါ",
             "အာရုံကြောင့် ဒေါသနာမ်တရား ပေါ်လာရတာ",
             "ဖြစ်ပြီးပျက်မယ့် ဒေါသနာမ် တရား လိုက်မခံစားနဲ့",
             "မေတ္တာ မေတ္တာ",
-            "အေးချမ်းကြပါစေ"
+            "အေးချမ်းကြပါစေ",
+            "ပျော်ရွှင်မှုဆိုတာလဲ နာမ်တရားပဲ",
+            "ပျော်ရွှင်မှု ဖြစ်ပြီး ပျက်စီးမှာပဲ",
+            "ပျော်ရွှင်မှုကို မတွယ်တာနဲ့",
+            "ပျော်ရွှင်မှုဟာ 'ငါ' မဟုတ်ဘူး"
         ];
 
         const dhammaTextElement = document.getElementById('dhamma-text');
@@ -287,14 +302,11 @@
             if (backgroundMusic.paused) {
                 backgroundMusic.play();
                 isMusicPlaying = true;
-                musicIcon.src = 'lotus.svg';
-                // Since using <img>, we don't change innerHTML.
-                // If you had separate play/pause images, you'd change musicIcon.src here.
+                musicIcon.src = 'lotus.svg'; // Set to lotus icon when playing
             } else {
                 backgroundMusic.pause();
                 isMusicPlaying = false;
-                musicIcon.src = 'play.svg'; // Reset to lotus icon when paused
-                // If you had separate play/pause images, you'd change musicIcon.src here.
+                musicIcon.src = 'play.svg'; // Set to play icon when paused
             }
         });
 

@@ -1,0 +1,21 @@
+{
+  "name": "ဓမ္မဉာဏ်ပွား",
+  "short_name": "ဓမ္မဉာဏ်",
+  "description": "တရားဓမ္မဆင်ခြင်ရန် ရိုးရှင်းသော Web App",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "icons": [
+    {
+      "src": "icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
